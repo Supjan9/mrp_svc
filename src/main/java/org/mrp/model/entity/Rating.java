@@ -1,7 +1,11 @@
 package org.mrp.model.entity;
 
+import lombok.Data;
+
 import java.util.Date;
 
+
+@Data
 public class Rating {
     private Long id;
     private Long userId;

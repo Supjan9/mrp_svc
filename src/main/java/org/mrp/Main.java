@@ -1,8 +1,16 @@
 package org.mrp;
 
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+import com.sun.net.httpserver.HttpServer;
+import org.mrp.config.ServerConfig;
+
+import java.io.IOException;
+import java.util.List;
+
+
 public class Main {
+    public static void main() throws IOException {
 
+        ServerConfig.startServer();
 
+    }
 }
