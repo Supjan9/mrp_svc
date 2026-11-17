@@ -40,13 +40,16 @@ public class Controller implements HttpHandler {
             case "GET /users/{userId}/recommendations":
                 getRecommendations();
                 break;
+            default:
+                getHome(exchange);
+                break;
 
         }
 
     }
 
     private void getRecommendations() {
-        
+
     }
 
     private void getFavorites() {

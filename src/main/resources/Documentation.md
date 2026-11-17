@@ -12,8 +12,7 @@ portainer running on port 9000
 postgres on 5432
 pgadmin on 5050
 
-
-
+Created the first flyway script and ran it to create a table users
 
 Http server implementation according to the article on geeksforgeeks
 https://www.geeksforgeeks.org/java/how-to-set-up-a-basic-http-server-in-java/
