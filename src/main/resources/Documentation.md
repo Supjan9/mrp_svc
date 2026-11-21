@@ -6,6 +6,7 @@ Created DTOs for certain requests and responses, I might have to change these la
 
 With the help of AI:
 Installed docker to setup a postgres database just to test things
+https://docs.docker.com/engine/install/
 Installed portainer for a GUI
 Pulled the images for Postgres and PGAdmin through portainer and deployed them
 portainer running on port 9000
