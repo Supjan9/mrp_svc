@@ -3,6 +3,10 @@ package org.mrp.config;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.flywaydb.core.Flyway;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
 public class DatabaseManager {
     private static final String ENV_KEY_DB_URL = "DB_URL";
     private static final String ENV_KEY_DB_USER = "DB_USER";
@@ -20,5 +24,9 @@ public class DatabaseManager {
 
         Flyway flyway = Flyway.configure().dataSource(dbUrl, dbUser, dbPass).load();
         flyway.migrate();
+    }
+
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(ENV_KEY_DB_URL, ENV_KEY_DB_USER, ENV_KEY_DB_PASS);
     }
 }
