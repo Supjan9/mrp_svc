@@ -41,3 +41,7 @@ Ai suggested that I use Resultset for my findUsernameByToken
 https://docs.oracle.com/javase/8/docs/api/java/sql/ResultSet.html
 
 Finished my first endpoint (register user), installed Postman and tested but didnt work, so I have to check my controller again and fix the mistakes (parameters are read incorrectly)
+
+Fixed dependency injection, initialized all classes in server config
+The register endpoint works now, I had to use json body instead of passing the parameters in the URL
+
