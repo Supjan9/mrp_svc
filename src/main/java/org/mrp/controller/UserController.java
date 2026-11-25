@@ -22,7 +22,17 @@ public class UserController {
     private static final int STATUS_CREATED = 201;
     private static final int STATUS_BAD_REQUEST = 400;
     private static final int STATUS_CONFLICT = 409;
+    private static final int STATUS_INTERNAL_ERROR = 500;
     private static final String PARAM_USER_ID = "userId";
+    private static final String HEADER_CONTENT_TYPE = "Content-Type";
+    private static final String CONTENT_TYPE_JSON = "application/json";
+
+    private static final String JSON_KEY_MESSAGE = "message";
+    private static final String MSG_INVALID_JSON = "Invalid JSON";
+    private static final String MSG_MISSING_FIELDS = "Missing fields";
+    private static final String MSG_USER_REGISTERED = "User registered successfully";
+    private static final String MSG_USER_REGISTER_FAILED = "User could not be registered";
+    private static final String MSG_SERVER_ERROR = "Internal server error";
 
     private static final String ROUTE_LOGIN = "/users/login";
     private static final String ROUTE_REGISTER = "/users/register";
@@ -51,17 +61,19 @@ public class UserController {
     }
 
     private void registerUser(HttpExchange exchange, Map<String, String> params) throws IOException {
-        UserRegisterDTO userRegisterDTO = new UserRegisterDTO();
+        UserRegisterDTO userRegisterDTO;
         try {
             userRegisterDTO = objectMapper.readValue(exchange.getRequestBody(), UserRegisterDTO.class);
         } catch (JacksonException e) {
-            sendResponse(exchange, STATUS_BAD_REQUEST, Map.of("message", "Invalid JSON").toString());
+            sendResponse(exchange, STATUS_BAD_REQUEST, Map.of(JSON_KEY_MESSAGE, MSG_INVALID_JSON));
+            return;
         }
 
         if (userRegisterDTO.getUsername() == null ||
                 userRegisterDTO.getEmail() == null ||
                 userRegisterDTO.getPassword() == null) {
-            sendResponse(exchange, STATUS_BAD_REQUEST, "Missing fields");
+            sendResponse(exchange, STATUS_BAD_REQUEST, Map.of(JSON_KEY_MESSAGE, MSG_MISSING_FIELDS));
+            return;
         }
         try {
             userService.registerUser(
@@ -69,9 +81,11 @@ public class UserController {
                     userRegisterDTO.getPassword(),
                     userRegisterDTO.getEmail()
             );
-            sendResponse(exchange, STATUS_CREATED, "User registered successfully");
+            sendResponse(exchange, STATUS_CREATED, Map.of(JSON_KEY_MESSAGE, MSG_USER_REGISTERED));
         } catch (SQLException e) {
-            sendResponse(exchange, STATUS_CONFLICT, "User could not be registered");
+            sendResponse(exchange, STATUS_CONFLICT, Map.of(JSON_KEY_MESSAGE, MSG_USER_REGISTER_FAILED));
+        } catch (RuntimeException e) {
+            sendResponse(exchange, STATUS_INTERNAL_ERROR, Map.of(JSON_KEY_MESSAGE, MSG_SERVER_ERROR));
         }
     }
 
@@ -100,8 +114,9 @@ public class UserController {
         sendResponse(exchange, STATUS_OK, "Recommendations for user " + userId);
     }
 
-    private void sendResponse(HttpExchange exchange, int statusCode, String response) throws IOException {
-        byte[] responseBytes = response.getBytes(StandardCharsets.UTF_8);
+    private void sendResponse(HttpExchange exchange, int statusCode, Object response) throws IOException {
+        byte[] responseBytes = objectMapper.writeValueAsBytes(response);
+        exchange.getResponseHeaders().set(HEADER_CONTENT_TYPE, CONTENT_TYPE_JSON);
         exchange.sendResponseHeaders(statusCode, responseBytes.length);
         try (OutputStream os = exchange.getResponseBody()) {
             os.write(responseBytes);

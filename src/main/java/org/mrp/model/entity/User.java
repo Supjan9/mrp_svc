@@ -4,6 +4,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Instant;
 import java.util.Date;
 
 @Getter
@@ -15,6 +16,8 @@ public class User {
     private String password;
     private String token;
     private String email;
+    private Instant tokenExpiresAt;
     @Setter(AccessLevel.NONE)
-    private Date createdAt;
+    private Instant createdAt;
+
 }

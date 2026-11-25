@@ -1,7 +1,6 @@
 package org.mrp.security;
 
 import de.mkammerer.argon2.Argon2;
-import de.mkammerer.argon2.Argon2Factory;
 
 public class PasswordHasher {
     private static final int ITERATIONS = 3;

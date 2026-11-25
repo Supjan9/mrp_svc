@@ -5,11 +5,14 @@ import org.mrp.security.PasswordHasher;
 import org.mrp.security.TokenGenerator;
 
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
 
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordHasher passwordHasher;
     private final TokenGenerator tokenGenerator;
+    private static final int TOKEN_EXPIRATION_MINUTES = 30;
 
 
     public UserService(UserRepository userRepository, PasswordHasher passwordHasher, TokenGenerator tokenGenerator) {
@@ -21,7 +24,8 @@ public class UserService {
     public String registerUser(String username, String password, String email) throws SQLException {
         String passwordHash = passwordHasher.hash(password);
         String token = tokenGenerator.generateToken();
-        userRepository.createUser(username, passwordHash, token, email);
+        Instant expiresAt = Instant.now().plus(Duration.ofMinutes(TOKEN_EXPIRATION_MINUTES));
+        userRepository.createUser(username, passwordHash, token, email, expiresAt);
         return token;
     }
 
