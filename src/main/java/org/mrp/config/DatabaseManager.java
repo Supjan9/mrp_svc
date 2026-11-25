@@ -14,19 +14,23 @@ public class DatabaseManager {
     private static final String ENV_DIR = "./src/main/resources";
     private static final String ENV_FILE = "postgres.env";
 
+    private final String dbUrl;
+    private final String dbUser;
+    private final String dbPass;
+
+    public DatabaseManager() {
+        Dotenv dotenv = Dotenv.configure().directory(ENV_DIR).filename(ENV_FILE).load();
+        this.dbUrl = dotenv.get(ENV_KEY_DB_URL);
+        this.dbUser = dotenv.get(ENV_KEY_DB_USER);
+        this.dbPass = dotenv.get(ENV_KEY_DB_PASS);
+    }
 
     public void runMigrations() {
-        Dotenv dotenv = Dotenv.configure().directory(ENV_DIR).filename(ENV_FILE).load();
-
-        final String dbUrl = dotenv.get(ENV_KEY_DB_URL);
-        final String dbUser = dotenv.get(ENV_KEY_DB_USER);
-        final String dbPass = dotenv.get(ENV_KEY_DB_PASS);
-
         Flyway flyway = Flyway.configure().dataSource(dbUrl, dbUser, dbPass).load();
         flyway.migrate();
     }
 
-    public static Connection getConnection() throws SQLException {
-        return DriverManager.getConnection(ENV_KEY_DB_URL, ENV_KEY_DB_USER, ENV_KEY_DB_PASS);
+    public Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(dbUrl, dbUser, dbPass);
     }
 }

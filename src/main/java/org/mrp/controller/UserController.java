@@ -2,14 +2,26 @@ package org.mrp.controller;
 
 import com.sun.net.httpserver.HttpExchange;
 import org.mrp.controller.Router;
+import org.mrp.model.dto.UserRegisterDTO;
+import org.mrp.model.entity.User;
+import org.mrp.service.UserService;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.Map;
 
 public class UserController {
+    private final UserService userService;
+    private final ObjectMapper objectMapper;
+
     private static final int STATUS_OK = 200;
+    private static final int STATUS_CREATED = 201;
+    private static final int STATUS_BAD_REQUEST = 400;
+    private static final int STATUS_CONFLICT = 409;
     private static final String PARAM_USER_ID = "userId";
 
     private static final String ROUTE_LOGIN = "/users/login";
@@ -18,6 +30,11 @@ public class UserController {
     private static final String ROUTE_RATINGS = "/users/{userId}/ratings";
     private static final String ROUTE_FAVORITES = "/users/{userId}/favorites";
     private static final String ROUTE_RECOMMENDATIONS = "/users/{userId}/recommendations";
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+        this.objectMapper = new ObjectMapper();
+    }
 
     public void registerRoutes(Router router) {
         router.post(ROUTE_LOGIN, this::loginUser);
@@ -34,7 +51,28 @@ public class UserController {
     }
 
     private void registerUser(HttpExchange exchange, Map<String, String> params) throws IOException {
-        sendResponse(exchange, STATUS_OK, "User registered");
+        UserRegisterDTO userRegisterDTO = new UserRegisterDTO();
+        try {
+            userRegisterDTO = objectMapper.readValue(exchange.getRequestBody(), UserRegisterDTO.class);
+        } catch (JacksonException e) {
+            sendResponse(exchange, STATUS_BAD_REQUEST, Map.of("message", "Invalid JSON").toString());
+        }
+
+        if (userRegisterDTO.getUsername() == null ||
+                userRegisterDTO.getEmail() == null ||
+                userRegisterDTO.getPassword() == null) {
+            sendResponse(exchange, STATUS_BAD_REQUEST, "Missing fields");
+        }
+        try {
+            userService.registerUser(
+                    userRegisterDTO.getUsername(),
+                    userRegisterDTO.getPassword(),
+                    userRegisterDTO.getEmail()
+            );
+            sendResponse(exchange, STATUS_CREATED, "User registered successfully");
+        } catch (SQLException e) {
+            sendResponse(exchange, STATUS_CONFLICT, "User could not be registered");
+        }
     }
 
     private void getUser(HttpExchange exchange, Map<String, String> params) throws IOException {

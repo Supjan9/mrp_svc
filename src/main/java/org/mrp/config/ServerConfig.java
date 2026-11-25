@@ -1,11 +1,17 @@
 package org.mrp.config;
 
 import com.sun.net.httpserver.HttpServer;
+import de.mkammerer.argon2.Argon2Factory;
 import org.mrp.controller.UserController;
 import org.mrp.controller.Router;
+import org.mrp.repository.UserRepository;
+import org.mrp.security.PasswordHasher;
+import org.mrp.security.TokenGenerator;
+import org.mrp.service.UserService;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.security.SecureRandom;
 
 public class ServerConfig {
     private static final int PORT = 8080;
@@ -27,7 +33,15 @@ public class ServerConfig {
     private static Router createRouter() {
         Router router = new Router();
 
-        UserController userController = new UserController();
+        SecureRandom secureRandom = new SecureRandom();
+        DatabaseManager databaseManager = new DatabaseManager();
+
+        TokenGenerator tokenGenerator = new TokenGenerator(secureRandom);
+        PasswordHasher passwordHasher = new PasswordHasher(Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id));
+        UserRepository userRepository = new UserRepository(databaseManager);
+
+        UserService userService = new UserService(userRepository, passwordHasher, tokenGenerator);
+        UserController userController = new UserController(userService);
         userController.registerRoutes(router);
 
         return router;
