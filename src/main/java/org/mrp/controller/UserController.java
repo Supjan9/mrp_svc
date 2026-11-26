@@ -3,6 +3,7 @@ package org.mrp.controller;
 import com.sun.net.httpserver.HttpExchange;
 import org.mrp.model.dto.UserCredentialsDTO;
 import org.mrp.model.dto.UserRegisterDTO;
+import org.mrp.security.AuthChecker;
 import org.mrp.service.UserService;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
@@ -16,7 +17,9 @@ public class UserController {
 
 
     private final UserService userService;
+    private final AuthChecker authChecker;
     private final ObjectMapper objectMapper;
+
 
     private static final int STATUS_OK = 200;
     private static final int STATUS_CREATED = 201;
@@ -37,26 +40,21 @@ public class UserController {
 
     private static final String MSG_USER_REGISTERED = "User registered successfully";
 
-    private static final String ROUTE_LOGIN = "/users/login";
-    private static final String ROUTE_REGISTER = "/users/register";
-    private static final String ROUTE_PROFILE = "/users/{userId}/profile";
-    private static final String ROUTE_RATINGS = "/users/{userId}/ratings";
-    private static final String ROUTE_FAVORITES = "/users/{userId}/favorites";
-    private static final String ROUTE_RECOMMENDATIONS = "/users/{userId}/recommendations";
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, AuthChecker authChecker, ObjectMapper objectMapper) {
         this.userService = userService;
-        this.objectMapper = new ObjectMapper();
+        this.objectMapper = objectMapper;
+        this.authChecker = authChecker;
     }
 
     public void registerRoutes(Router router) {
-        router.post(ROUTE_LOGIN, this::loginUser);
-        router.post(ROUTE_REGISTER, this::registerUser);
-        router.put(ROUTE_PROFILE, this::updateUser);
-        router.get(ROUTE_PROFILE, this::getUser);
-        router.get(ROUTE_RATINGS, this::getRatings);
-        router.get(ROUTE_FAVORITES, this::getFavorites);
-        router.get(ROUTE_RECOMMENDATIONS, this::getRecommendations);
+        router.post("/users/login", this::loginUser);
+        router.post("/users/register", this::registerUser);
+        router.put("/users/{userId}/profile", this::updateUser);
+        router.get("/users/{userId}/profile", this::getUser);
+        router.get("/users/{userId}/ratings", this::getRatings);
+        router.get("/users/{userId}/favorites", this::getFavorites);
+        router.get("/users/{userId}/recommendations", this::getRecommendations);
     }
 
     private void loginUser(HttpExchange exchange, Map<String, String> params) throws IOException {

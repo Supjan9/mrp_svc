@@ -1,6 +1,5 @@
 package org.mrp.service;
 
-import org.flywaydb.core.internal.parser.Token;
 import org.mrp.model.entity.User;
 import org.mrp.repository.UserRepository;
 import org.mrp.security.PasswordHasher;
@@ -35,7 +34,7 @@ public class UserService {
         if (token == null) {
             return false;
         }
-        return userRepository.findUsernameByToken(token) != null;
+        return userRepository.findUserByToken(token) != null;
     }
 
     public String loginUser(String userName, String password) {

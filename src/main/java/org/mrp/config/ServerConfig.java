@@ -2,12 +2,16 @@ package org.mrp.config;
 
 import com.sun.net.httpserver.HttpServer;
 import de.mkammerer.argon2.Argon2Factory;
+import org.mrp.controller.MediaController;
 import org.mrp.controller.UserController;
 import org.mrp.controller.Router;
 import org.mrp.repository.UserRepository;
+import org.mrp.security.AuthChecker;
 import org.mrp.security.PasswordHasher;
 import org.mrp.security.TokenGenerator;
+import org.mrp.service.MediaService;
 import org.mrp.service.UserService;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -35,13 +39,18 @@ public class ServerConfig {
 
         SecureRandom secureRandom = new SecureRandom();
         DatabaseManager databaseManager = new DatabaseManager();
+        ObjectMapper objectMapper = new ObjectMapper();
 
         TokenGenerator tokenGenerator = new TokenGenerator(secureRandom);
         PasswordHasher passwordHasher = new PasswordHasher(Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id));
         UserRepository userRepository = new UserRepository(databaseManager);
+        AuthChecker authChecker = new AuthChecker(userRepository);
 
         UserService userService = new UserService(userRepository, passwordHasher, tokenGenerator);
-        UserController userController = new UserController(userService);
+        MediaService mediaService = new MediaService();
+        UserController userController = new UserController(userService, authChecker, objectMapper);
+        MediaController mediaController = new MediaController(mediaService, authChecker, objectMapper);
+        mediaController.registerRoutes(router);
         userController.registerRoutes(router);
 
         return router;
