@@ -5,6 +5,7 @@ import de.mkammerer.argon2.Argon2Factory;
 import org.mrp.controller.MediaController;
 import org.mrp.controller.UserController;
 import org.mrp.controller.Router;
+import org.mrp.repository.MediaRepository;
 import org.mrp.repository.UserRepository;
 import org.mrp.security.AuthChecker;
 import org.mrp.security.PasswordHasher;
@@ -44,10 +45,11 @@ public class ServerConfig {
         TokenGenerator tokenGenerator = new TokenGenerator(secureRandom);
         PasswordHasher passwordHasher = new PasswordHasher(Argon2Factory.create(Argon2Factory.Argon2Types.ARGON2id));
         UserRepository userRepository = new UserRepository(databaseManager);
+        MediaRepository mediaRepository = new MediaRepository(databaseManager);
         AuthChecker authChecker = new AuthChecker(userRepository);
 
         UserService userService = new UserService(userRepository, passwordHasher, tokenGenerator);
-        MediaService mediaService = new MediaService();
+        MediaService mediaService = new MediaService(mediaRepository);
         UserController userController = new UserController(userService, authChecker, objectMapper);
         MediaController mediaController = new MediaController(mediaService, authChecker, objectMapper);
         mediaController.registerRoutes(router);

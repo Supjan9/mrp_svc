@@ -45,3 +45,11 @@ Finished my first endpoint (register user), installed Postman and tested but did
 Fixed dependency injection, initialized all classes in server config
 The register endpoint works now, I had to use json body instead of passing the parameters in the URL
 
+Created the login endpoint, had to alter the user table to add a new column for saving the token expiration timestamp
+I let AI explain to me how a bearer token works and how it helps secure my endpoints
+Now when a user tries to login I use the verify function of my Passowordhasher to authorize users and also save a new token in the database
+
+Started implementing the Mediacontroller, service and repository
+altered the database table and changed some column names to be consistent with other tables
+
+Wrote an AuthChecker which i will be using for all endpoints from now on that will need to be secured

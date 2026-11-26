@@ -35,7 +35,7 @@ public class UserController {
     private static final String MSG_INVALID_JSON = "Invalid JSON";
     private static final String MSG_MISSING_FIELDS = "Missing fields";
     private static final String MSG_USER_REGISTER_FAILED = "User could not be registered";
-    private static final Object MSG_USER_LOGIN_FAILED = "Login failed";
+    private static final String MSG_USER_LOGIN_FAILED = "Login failed";
     private static final String MSG_SERVER_ERROR = "Internal server error";
 
     private static final String MSG_USER_REGISTERED = "User registered successfully";
