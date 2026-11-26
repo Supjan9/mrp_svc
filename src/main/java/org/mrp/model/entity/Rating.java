@@ -2,6 +2,7 @@ package org.mrp.model.entity;
 
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.Date;
 
 
@@ -12,6 +13,6 @@ public class Rating {
     private Long mediaId;
     private Integer starRating;
     private String comment;
-    private Date timeStamp;
+    private Instant timeStamp;
 
 }

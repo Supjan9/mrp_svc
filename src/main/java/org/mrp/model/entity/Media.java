@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.mrp.model.Genre;
 import org.mrp.model.MediaType;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import java.util.Set;
 public class Media {
     @Setter(AccessLevel.NONE)
     private Long id;
+    private Long creatorId;
     private String title;
     private String description;
     private MediaType mediaType;
@@ -21,6 +23,6 @@ public class Media {
     private Set<Genre> genres;
     private Integer ageRestriction;
     @Setter(AccessLevel.NONE)
-    private Date createdAt;
+    private Instant createdAt;
 
 }

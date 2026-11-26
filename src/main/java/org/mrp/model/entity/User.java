@@ -17,8 +17,8 @@ public class User {
     private String password;
     private String token;
     private String email;
-    private Instant tokenExpiresAt;
     @Setter(AccessLevel.NONE)
     private Instant createdAt;
+    private Instant tokenExpiresAt;
 
 }
