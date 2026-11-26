@@ -1,20 +1,20 @@
 package org.mrp.controller;
 
 import com.sun.net.httpserver.HttpExchange;
-import org.mrp.controller.Router;
+import org.mrp.model.dto.UserCredentialsDTO;
 import org.mrp.model.dto.UserRegisterDTO;
-import org.mrp.model.entity.User;
 import org.mrp.service.UserService;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.util.Map;
 
 public class UserController {
+
+
     private final UserService userService;
     private final ObjectMapper objectMapper;
 
@@ -28,11 +28,14 @@ public class UserController {
     private static final String CONTENT_TYPE_JSON = "application/json";
 
     private static final String JSON_KEY_MESSAGE = "message";
+    private static final String JSON_KEY_TOKEN = "token";
     private static final String MSG_INVALID_JSON = "Invalid JSON";
     private static final String MSG_MISSING_FIELDS = "Missing fields";
-    private static final String MSG_USER_REGISTERED = "User registered successfully";
     private static final String MSG_USER_REGISTER_FAILED = "User could not be registered";
+    private static final Object MSG_USER_LOGIN_FAILED = "Login failed";
     private static final String MSG_SERVER_ERROR = "Internal server error";
+
+    private static final String MSG_USER_REGISTERED = "User registered successfully";
 
     private static final String ROUTE_LOGIN = "/users/login";
     private static final String ROUTE_REGISTER = "/users/register";
@@ -57,7 +60,27 @@ public class UserController {
     }
 
     private void loginUser(HttpExchange exchange, Map<String, String> params) throws IOException {
-        sendResponse(exchange, STATUS_OK, "User logged in");
+        UserCredentialsDTO userCredentialsDTO;
+        try {
+            userCredentialsDTO = objectMapper.readValue(exchange.getRequestBody(), UserCredentialsDTO.class);
+        } catch (JacksonException e) {
+            sendResponse(exchange, STATUS_BAD_REQUEST, Map.of(JSON_KEY_MESSAGE, MSG_INVALID_JSON));
+            return;
+        }
+        if (userCredentialsDTO.getUsername() == null || userCredentialsDTO.getPassword() == null) {
+            sendResponse(exchange, STATUS_BAD_REQUEST, Map.of(JSON_KEY_MESSAGE, MSG_MISSING_FIELDS));
+            return;
+        }
+        try {
+            String newToken = userService.loginUser(
+                    userCredentialsDTO.getUsername(),
+                    userCredentialsDTO.getPassword()
+            );
+            sendResponse(exchange, STATUS_OK, Map.of(JSON_KEY_TOKEN, newToken));
+        } catch (Exception e) {
+            e.printStackTrace();
+            sendResponse(exchange, STATUS_CONFLICT, Map.of(JSON_KEY_MESSAGE, MSG_USER_LOGIN_FAILED));
+        }
     }
 
     private void registerUser(HttpExchange exchange, Map<String, String> params) throws IOException {

@@ -1,5 +1,7 @@
 package org.mrp.service;
 
+import org.flywaydb.core.internal.parser.Token;
+import org.mrp.model.entity.User;
 import org.mrp.repository.UserRepository;
 import org.mrp.security.PasswordHasher;
 import org.mrp.security.TokenGenerator;
@@ -34,6 +36,24 @@ public class UserService {
             return false;
         }
         return userRepository.findUsernameByToken(token) != null;
+    }
+
+    public String loginUser(String userName, String password) {
+        User user = userRepository.findUserByUsername(userName);
+        if (user == null || !passwordHasher.verify(user.getPassword(), password)) {
+            throw new SecurityException("Invalid login credentials");
+        }
+
+        String freshToken = tokenGenerator.generateToken();
+        Instant expiresAt = Instant.now().plus(Duration.ofMinutes(TOKEN_EXPIRATION_MINUTES));
+        try {
+            userRepository.updateToken(userName, freshToken, expiresAt);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+        return freshToken;
     }
 
 }

@@ -1,6 +1,7 @@
 package org.mrp.repository;
 
 import org.mrp.config.DatabaseManager;
+import org.mrp.model.entity.User;
 
 import java.sql.*;
 import java.time.Instant;
@@ -10,6 +11,7 @@ public class UserRepository {
     private static final String SQL_CREATE_USER = "INSERT INTO users (username, password, token, email, token_expires_at) VALUES (?, ?, ?, ?, ?)";
     private static final String SQL_UPDATE_TOKEN = "UPDATE users SET token = ?, token_expires_at = ? WHERE username = ?";
     private static final String SQL_FIND_BY_TOKEN = "SELECT username FROM users WHERE token = ? AND token_expires_at > NOW()";
+    private static final String SQL_FIND_BY_USERNAME = "SELECT id, username, password, token, email,  created_at, token_expires_at FROM users WHERE username = ?";
     private static final String COLUMN_USERNAME = "username";
     private static final String ERROR_CREATE_USER = "Error creating user";
     private static final String ERROR_UPDATE_TOKEN = "Error updating token";
@@ -53,6 +55,30 @@ public class UserRepository {
             try (ResultSet rs = statement.executeQuery()) {
                 if (rs.next()) {
                     return rs.getString(COLUMN_USERNAME);
+                }
+                return null;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(ERROR_FIND_USER, e);
+        }
+    }
+
+    public User findUserByUsername(String userName) {
+        try (Connection conn = databaseManager.getConnection(); PreparedStatement statement = conn.prepareStatement(SQL_FIND_BY_USERNAME)) {
+            statement.setString(1, userName);
+            try (ResultSet rs = statement.executeQuery()) {
+                if (rs.next()) {
+                    Timestamp createdAt = rs.getTimestamp("created_at");
+                    Timestamp tokenExpiresAt = rs.getTimestamp("token_expires_at");
+                    return new User(
+                            rs.getLong("id"),
+                            rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getString("token"),
+                            rs.getString("email"),
+                            createdAt.toInstant(),
+                            tokenExpiresAt.toInstant()
+                    );
                 }
                 return null;
             }

@@ -1,14 +1,15 @@
 package org.mrp.model.entity;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.Instant;
 import java.util.Date;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString
 public class User {
     @Setter(AccessLevel.NONE)
     private Long id;
